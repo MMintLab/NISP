@@ -42,7 +42,7 @@ def get_config():
     optim.decay_steps = 2000
 
     config.training = training = ml_collections.ConfigDict()
-    training.max_steps = 200000
+    training.max_steps = 10000
     training.batch_size = 4096
     training.num_time_windows = 10
 
@@ -69,7 +69,7 @@ def get_config():
 
     # Saving
     config.saving = saving = ml_collections.ConfigDict()
-    saving.save_every_steps = None
+    saving.save_every_steps = logging.log_every_steps
     saving.num_keep_ckpts = 10
 
     # # Input shape for initializing Flax models

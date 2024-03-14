@@ -41,7 +41,7 @@ def save_checkpoint(state, workdir, keep=5, name=None):
         # Get the first replica's state and save it.
         state = jax.device_get(tree_map(lambda x: x[0], state))
         step = int(state.step)
-        checkpoints.save_checkpoint(workdir, state, step=step, keep=keep)
+        checkpoints.save_checkpoint(os.path.abspath(workdir), state, step=step, keep=keep, overwrite=True)
 
 
 def restore_checkpoint(state, workdir, step=None):

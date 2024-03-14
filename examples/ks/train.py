@@ -58,7 +58,7 @@ def train_one_window(config, workdir, model, res_sampler, u_ref, idx):
                 path = os.path.join(
                     workdir, "ckpt", config.wandb.name, "time_window_{}".format(idx + 1)
                 )
-                save_checkpoint(model.state, path, keep=config.saving.num_keep_ckpts)
+                save_checkpoint(model.state, os.path.abspath(path), keep=config.saving.num_keep_ckpts)
 
     return model
 

@@ -18,6 +18,7 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_string("workdir", ".", "Directory to store model data.")
 
+
 config_flags.DEFINE_config_file(
     "config",
     "./configs/default.py",

@@ -39,6 +39,7 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
         ckpt_path = os.path.join(
             workdir, "ckpt", config.wandb.name, "time_window_{}".format(idx + 1)
         )
+        print(ckpt_path)
         model.state = restore_checkpoint(model.state, ckpt_path)
         params = model.state.params
 
@@ -85,6 +86,6 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
     # Save the figure
     save_dir = os.path.join(workdir, "figures", config.wandb.name)
     if not os.path.isdir(save_dir):
-        os.makedirs(save_path)
+        os.makedirs(save_dir)
     fig_path = os.path.join(save_dir, "ks.pdf")
     fig.savefig(fig_path, bbox_inches="tight", dpi=300)

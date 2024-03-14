@@ -66,7 +66,7 @@ python3 main.py --config/sota.py
 Once trained, to obtain the final predicted error and visualizations, run:
 
 ```
-python3 main.py --config/sota.py --mode=eval
+python3 main.py --config ./configs/sota.py --config.mode=eval
 ```
 
 

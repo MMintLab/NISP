@@ -12,7 +12,7 @@ import optax
 
 from jaxpi import archs
 from jaxpi.utils import flatten_pytree
-
+from jax.experimental.host_callback import call
 
 class TrainState(train_state.TrainState):
     weights: Dict
@@ -168,7 +168,9 @@ class PINN:
 
     @partial(pmap, axis_name="batch", static_broadcasted_argnums=(0,))
     def step(self, state, batch, *args):
+        print("step")
         grads = grad(self.loss)(state.params, state.weights, batch, *args)
+        print("grad")
         grads = lax.pmean(grads, "batch")
         state = state.apply_gradients(grads=grads)
         return state
