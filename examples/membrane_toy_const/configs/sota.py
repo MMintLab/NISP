@@ -59,6 +59,8 @@ def get_config():
             "w_in": 1.0,
             "w_bc": 1.0,
             "r": 1e-3,
+            "r_a": 1e-3,
+            "r_b": 1e-3,
         }
     )
     weighting.momentum = 0.9

@@ -4,6 +4,7 @@ from typing import Any, Callable, Sequence, Tuple, Optional, Dict
 from flax.training import train_state
 from flax import jax_utils
 
+import jax
 import jax.numpy as jnp
 from jax import lax, jit, grad, pmap, random, tree_map, jacfwd, jacrev
 from jax.tree_util import tree_map, tree_reduce, tree_leaves
@@ -78,11 +79,15 @@ def _create_optimizer(config):
     return tx
 
 
-def _create_train_state(config):
+def _create_train_state(config, trainable_parameters = None):
     # Initialize network
     arch = _create_arch(config.arch)
     x = jnp.ones(config.input_dim)
     params = arch.init(random.PRNGKey(config.seed), x)
+    
+
+    if trainable_parameters is not None:
+        params["params"]["trainable_parameters"] = trainable_parameters[0]
 
     # Initialize optax optimizer
     tx = _create_optimizer(config.optim)
@@ -102,9 +107,9 @@ def _create_train_state(config):
 
 
 class PINN:
-    def __init__(self, config):
+    def __init__(self, config, trainable_parameters = None):
         self.config = config
-        self.state = _create_train_state(config)
+        self.state = _create_train_state(config, trainable_parameters)
 
     def u_net(self, params, *args):
         raise NotImplementedError("Subclasses should implement this!")
@@ -187,5 +192,5 @@ class ForwardIVP(PINN):
 
 
 class ForwardBVP(PINN):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, **kwarg):
+        super().__init__(config, **kwarg)

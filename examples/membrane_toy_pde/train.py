@@ -47,12 +47,12 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
 
 
     if config.nondim == True:
-        L = 20. # Scalling factor 
+        L = 15. # Scalling factor 
         E = E / (L **2) # rubber 0.1 GPa (N/m**2)
         P = P / (L **2)
         t = t * L# 0.3 mm
         # geom = dde.geometry.Interval(-1, 1)
-        a, b = 0.04*L, 0.04*L
+        a, b = a*L, b*L
         wall_coords = wall_coords * L
         coords = coords * L
  
@@ -76,7 +76,6 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
         start_time = time.time()
 
         batch = next(res_sampler)
-        print("sampled")
         model.state = model.step(model.state, batch)
 
         # Update weights if necessary

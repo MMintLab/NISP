@@ -1,5 +1,5 @@
 import ml_collections
-
+import math
 import jax.numpy as jnp
 
 
@@ -7,7 +7,7 @@ def get_config():
     """Get the default hyperparameter configuration."""
     config = ml_collections.ConfigDict()
 
-    config.mode = "eval"
+    config.mode = "train"
 
     # Weights & Biases
     config.wandb = wandb = ml_collections.ConfigDict()
@@ -26,9 +26,10 @@ def get_config():
     arch.out_dim = 3
     arch.activation = "tanh"  # gelu works better than tanh
     arch.periodicity = None
-    arch.fourier_emb = ml_collections.ConfigDict(
-        {"embed_scale": 1.0, "embed_dim": 256}
-    )
+    arch.fourier_emb = None
+    # ml_collections.ConfigDict(
+    #     {"embed_scale": math.pi , "embed_dim": 128}
+    # )
     arch.reparam = ml_collections.ConfigDict(
         {"type": "weight_fact", "mean": 0.5, "stddev": 0.1}
     )
@@ -57,12 +58,11 @@ def get_config():
             "u_in": 1.0,
             "v_in": 1.0,
             "w_in": 1.0,
-
-            "r": 1e-3,
+            "r": 1.0,
         }
     )
     weighting.momentum = 0.9
-    weighting.update_every_steps = 1000  # 100 for grad norm and 1000 for ntk
+    weighting.update_every_steps = 100  # 100 for grad norm and 1000 for ntk
 
     # Logging
     config.logging = logging = ml_collections.ConfigDict()

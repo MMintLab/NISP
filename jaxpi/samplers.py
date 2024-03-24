@@ -55,6 +55,22 @@ class SpaceSampler(BaseSampler):
         batch = self.coords[idx, :]
 
         return batch
+    
+class SpaceSampler_dict(BaseSampler):
+    def __init__(self, coords_dict, batch_size, rng_key=random.PRNGKey(1234)):
+        super().__init__(batch_size, rng_key)
+        self.coords_dict = coords_dict
+
+    @partial(pmap, static_broadcasted_argnums=(0,))
+    def data_generation(self, key):
+        "Generates data containing batch_size samples"
+        batch_dict = {}
+        for k, itm in self.coords_dict.items():
+            idx = random.choice(key, itm.shape[0], shape=(self.batch_size,))
+            batch_dict[k] = itm[idx, :]
+
+        return batch_dict
+
 
 
 class TimeSpaceSampler(BaseSampler):

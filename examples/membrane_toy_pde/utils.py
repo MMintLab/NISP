@@ -9,8 +9,8 @@ from bubble_tools.bubble_tools.bubble_ellipsoid_tools import load_ellipse
 
 def get_dataset(N=100000):
 
-    a, b = 0.04, 0.04
-    E, P, t, nu = 1e9, 2757, 0.0003, 0.5
+    a, b = 0.06, 0.04
+    E, P, t, nu = 1e6, 2757, 0.0003, 0.5
     ellipse_points = load_ellipse(2*a, 2*b, num_points=10000)
     
     geom = dde.geometry.Ellipse([0,0], a, b)

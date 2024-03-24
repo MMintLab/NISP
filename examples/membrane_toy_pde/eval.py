@@ -43,7 +43,7 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
     ) = get_dataset(10000)
 
     if config.nondim == True:
-        L = 20. # Scalling factor 
+        L = 15. # Scalling factor 
         E = E / (L **2) # rubber 0.1 GPa (N/m**2)
         P =  P / (L **2)
         t = t * L# 0.3 mm
@@ -67,6 +67,8 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
 
 
     w_pred = model.w_pred_fn(params, coords[:,0] ,coords[:,1])
+    u_pred = model.u_pred_fn(params, coords[:,0], coords[:,1])
+    v_pred = model.v_pred_fn(params, coords[:,0], coords[:,1])
 
     D =  E * t **3 / (12 * (1 - nu**2))
     w_gt = P/ (64 * D) * (coords[:,0]**2 + coords[:,1]**2  - a**2) **2
@@ -74,6 +76,12 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
 
     w_error = np.array(abs(w_pred-w_gt))
     w_pred = np.array(w_pred)
+    # yhat = model.predict(x)/L
+    print(max(u_pred/L * 1e3) , max(v_pred/L * 1e3 ))
+
+    x_hat = (coords[:, 0] + u_pred)/L #+ yhat[:, 0]
+    y_hat = (coords[:, 1] + v_pred)/L #+ yhat[:, 1]
+    z_hat = w_pred/L
 
 
     error_max = (0.001 * L)

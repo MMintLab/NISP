@@ -58,7 +58,7 @@ class Membrane(ForwardBVP):
         v = outputs[1]
         w = outputs[2]
         
-        return u, v, w, f
+        return u, v, w
 
     def u_net(self, params, x, y):
         u, _, _, _ = self.neural_net(params, x, y)

@@ -74,7 +74,7 @@ def evaluate(config: ml_collections.ConfigDict, workdir: str):
     
     color = ext_f / max(ext_f)
     import matplotlib.cm as cm
-    color = cm.autumn(color).squeeze()[..., :3]
+    color = cm.cool(color).squeeze()[..., :3]
     # print(color.shape)   
     
     # yhat = model.predict(x)/L
