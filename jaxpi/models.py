@@ -27,19 +27,25 @@ class TrainState(train_state.TrainState):
           and additional attributes replaced as specified by `kwargs`.
         """
 
-        running_average = (
-            lambda old_w, new_w: old_w * self.momentum + (1 - self.momentum) * new_w
-        )
-        weights = tree_map(running_average, self.weights, weights)
-        weights = lax.stop_gradient(weights)
+        # Define the running average function
+        def running_average(old_w, new_w, momentum):
+            return old_w * momentum + new_w * (1 - momentum)
 
-        return self.replace(
-            step=self.step,
-            params=self.params,
-            opt_state=self.opt_state,
-            weights=weights,
-            **kwargs,
-        )
+        # Update the weights using running average
+        def update_weights(old_weights, new_weights, momentum):
+            return tree_map(lambda old_w, new_w: running_average(old_w, new_w, momentum), old_weights, new_weights)
+
+        # Update the weights in place
+        weights = update_weights(self.weights, weights, self.momentum)
+        return lax.stop_gradient(weights)
+
+        # return self.replace(
+        #     step=self.step,
+        #     params=self.params,
+        #     opt_state=self.opt_state,
+        #     weights=weights,
+        #     **kwargs,
+        # )
 
 
 def _create_arch(config):
@@ -51,6 +57,9 @@ def _create_arch(config):
 
     elif config.arch_name == "DeepONet":
         arch = archs.DeepONet(**config)
+
+    elif config.arch_name == "ModifiedMlpIDP":
+        arch = archs.ModifiedMlpIDP(**config)
 
     else:
         raise NotImplementedError(f"Arch {config.arch_name} not supported yet!")
@@ -110,6 +119,7 @@ class PINN:
     def __init__(self, config, trainable_parameters = None):
         self.config = config
         self.state = _create_train_state(config, trainable_parameters)
+        self.weights = self.state.weights # TODO: this is a bandage treatment
 
     def u_net(self, params, *args):
         raise NotImplementedError("Subclasses should implement this!")
@@ -133,11 +143,13 @@ class PINN:
         loss = tree_reduce(lambda x, y: x + y, weighted_losses)
         return loss
 
+
     @partial(jit, static_argnums=(0,))
     def compute_weights(self, params, batch, *args):
         if self.config.weighting.scheme == "grad_norm":
             # Compute the gradient of each loss w.r.t. the parameters
             grads = jacrev(self.losses)(params, batch, *args)
+            grads = lax.stop_gradient(grads)
 
             # Compute the grad norm of each loss
             grad_norm_dict = {}
@@ -145,8 +157,14 @@ class PINN:
                 flattened_grad = flatten_pytree(value)
                 grad_norm_dict[key] = jnp.linalg.norm(flattened_grad)
 
-            # Compute the mean of grad norms over all losses
-            mean_grad_norm = jnp.mean(jnp.stack(tree_leaves(grad_norm_dict)))
+            sum_grad_norm = sum(tree_leaves(grad_norm_dict))
+
+            # Count the total number of elements in grad_norm_dict
+            num_elements = sum(len(tree_leaves(grad_norm)) for grad_norm in grad_norm_dict.values())
+
+            # Compute the mean grad norm
+            mean_grad_norm = sum_grad_norm / num_elements
+
             # Grad Norm Weighting
             w = tree_map(lambda x: (mean_grad_norm / x), grad_norm_dict)
 
@@ -163,22 +181,23 @@ class PINN:
             w = tree_map(lambda x: (mean_ntk / x), mean_ntk_dict)
 
         return w
-
+    
+    @partial(pmap, axis_name="batch", static_broadcasted_argnums=(0,))
+    def step(self, state, batch, *args):
+        # TODO: increase measurement loss 
+        grads = grad(self.loss)(state.params, state.weights, batch, *args)
+        grads = lax.pmean(grads, "batch")
+        state = state.apply_gradients(grads=grads)
+        return state
+    
     @partial(pmap, axis_name="batch", static_broadcasted_argnums=(0,))
     def update_weights(self, state, batch, *args):
         weights = self.compute_weights(state.params, batch, *args)
         weights = lax.pmean(weights, "batch")
-        state = state.apply_weights(weights=weights)
-        return state
+        return state.apply_weights(weights=weights)
+        # return 
 
-    @partial(pmap, axis_name="batch", static_broadcasted_argnums=(0,))
-    def step(self, state, batch, *args):
-        print("step")
-        grads = grad(self.loss)(state.params, state.weights, batch, *args)
-        print("grad")
-        grads = lax.pmean(grads, "batch")
-        state = state.apply_gradients(grads=grads)
-        return state
+
 
 
 class ForwardIVP(PINN):

@@ -59,6 +59,7 @@ def restore_checkpoint(state, workdir, step=None):
         jax.tree_map(lambda x: jnp.array(x).sharding, jax.tree_leaves(state.params))[0],
         jax.sharding.SingleDeviceSharding,
     )
-
     state = checkpoints.restore_checkpoint(workdir, state, step=step)
+    print("Restore checkpoint ", workdir, "at step ", state.step)
+
     return state

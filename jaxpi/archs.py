@@ -117,7 +117,6 @@ class Dense(nn.Module):
             kernel = g * v
 
         bias = self.param("bias", self.bias_init, (self.features,))
-
         y = jnp.dot(x, kernel) + bias
 
         return y
@@ -152,6 +151,46 @@ class Mlp(nn.Module):
             x = self.activation_fn(x)
 
         x = Dense(features=self.out_dim, reparam=self.reparam)(x)
+        return x
+
+
+class ModifiedMlpIDP(nn.Module):
+    arch_name: Optional[str] = "ModifiedMlpIDP"
+    num_layers: int = 4
+    hidden_dim: int = 256
+    out_dim: int = 1
+    activation: str = "tanh"
+    periodicity: Union[None, Dict] = None
+    fourier_emb: Union[None, Dict] = None
+    reparam: Union[None, Dict] = None
+
+    def setup(self):
+        self.activation_fn = _get_activation(self.activation)
+
+    @nn.compact
+    def __call__(self, x):
+        if self.periodicity:
+            x = PeriodEmbs(**self.periodicity)(x)
+
+        if self.fourier_emb:
+            x = FourierEmbs(**self.fourier_emb)(x)
+
+        u = Dense(features=self.hidden_dim, reparam=self.reparam)(x)
+        v = Dense(features=self.hidden_dim, reparam=self.reparam)(x)
+
+        u = self.activation_fn(u)
+        v = self.activation_fn(v)
+
+        for _ in range(self.num_layers):
+            x = Dense(features=self.hidden_dim, reparam=self.reparam)(x)
+            x = self.activation_fn(x)
+            x = x * u + (1 - x) * v
+
+        # last layer
+        output = []
+        for _ in range(self.out_dim):
+            output.append(Dense(features=1, reparam=self.reparam)(x))
+        x = jnp.concatenate(output, axis = -1)
         return x
 
 

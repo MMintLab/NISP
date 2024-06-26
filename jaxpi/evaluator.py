@@ -19,9 +19,10 @@ class BaseEvaluator:
             self.log_dict[key + "_loss"] = values
 
     def log_weights(self, state):
-        weights = state.weights
+        weights = self.model.weights
         for key, values in weights.items():
             self.log_dict[key + "_weight"] = values
+
 
     def log_grads(self, params, batch, *args):
         grads = jacrev(self.model.losses)(params, batch, *args)
