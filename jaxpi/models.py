@@ -119,7 +119,7 @@ class PINN:
     def __init__(self, config, trainable_parameters = None):
         self.config = config
         self.state = _create_train_state(config, trainable_parameters)
-        self.weights = self.state.weights # TODO: this is a bandage treatment
+        self.weights = self.state.weights 
 
     def u_net(self, params, *args):
         raise NotImplementedError("Subclasses should implement this!")
@@ -143,6 +143,21 @@ class PINN:
         loss = tree_reduce(lambda x, y: x + y, weighted_losses)
         return loss
 
+
+    @partial(pmap, axis_name="batch", static_broadcasted_argnums=(0,))
+    def compute_loss_gradients(self, params, batch, *args):
+        if self.config.weighting.scheme == "grad_norm":
+            # Compute the gradient of each loss w.r.t. the parameters
+            grads = jacrev(self.losses)(params.params, batch, *args)
+            grads = lax.stop_gradient(grads)
+
+            # Compute the grad norm of each loss
+            grad_norm_dict = {}
+            for key, value in grads.items():
+                flattened_grad = flatten_pytree(value)
+                grad_norm_dict[key] = jnp.linalg.norm(flattened_grad)
+
+        return grad_norm_dict
 
     @partial(jit, static_argnums=(0,))
     def compute_weights(self, params, batch, *args):
