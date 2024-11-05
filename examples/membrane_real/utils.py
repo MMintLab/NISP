@@ -21,18 +21,18 @@ from bubble_tools.bubble_tools.bubble_img_tools import process_bubble_img, unpro
 from bubble_tools.bubble_tools.bubble_ellipsoid_tools import load_ellipse
 from bubble_tools.bubble_tools.bubble_shear_tools import load_deformation_field, load_deformation_field_advanced,  compute_deformation_field_advanced
 from bubble_tools.bubble_datasets.implemented_datasets.bubble_v2_dataset import BubbleV2Dataset
-import mmint_tools.data_utils.loading_utils as load_utils
-from mmint_tools import tr, pose_to_matrix, matrix_to_pose, transform_matrix_inverse
-from mmint_tools.camera_tools.img_utils import project_depth_image
+# import mmint_tools.data_utils.loading_utils as load_utils
+# from mmint_tools import tr, pose_to_matrix, matrix_to_pose, transform_matrix_inverse
+# from mmint_tools.camera_tools.img_utils import project_depth_image
 import pickle
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 
 
 
-def get_dataset(N=100000, SEQ_IDX=0, data_name = None):
+def get_dataset(N=100000, SEQ_IDX=0, data_name = None, noise_lev = 0):
     data_dir = 'data'# Replace this with the path to the data
     data_name = 'bubble_v2_tactile_shadowing_data' if data_name is None else data_name
     # data_name = 'bubble_v2_tactile_shadowing_data_only_o_45'
@@ -61,16 +61,12 @@ def get_dataset(N=100000, SEQ_IDX=0, data_name = None):
     data_i = sample
     obs_pcd = data_i['bubble_pointcloud_bf'][...,:3].reshape(-1,3)
 
-    # noise_lev = 0.002
-    # noise = np.random.normal(0, noise_lev, size = obs_pcd[:,0].shape)
-    # obs_pcd[:,2] = obs_pcd[:,2] + noise
+    noise = np.random.normal(0, noise_lev, size = obs_pcd[:,0].shape)
+    obs_pcd[:,2] = obs_pcd[:,2] + noise
 
-    # bubble_pcd_noise = copy.copy(data_i['bubble_pointcloud_bf'])
-    # bubble_pcd_noise[:,:3] = obs_pcd
-    # sample["bubble_pointcloud_bf"] = bubble_pcd_noise
-    
-    # with open(f'sample_{SEQ_IDX}_noise_{noise_lev}.pkl', 'wb') as f:
-    #     pickle.dump(sample, f)
+    bubble_pcd_noise = copy.copy(data_i['bubble_pointcloud_bf'])
+    bubble_pcd_noise[:,:3] = obs_pcd
+    sample["bubble_pointcloud_bf"] = bubble_pcd_noise
     
      
     obs_pcd = jnp.array(obs_pcd)

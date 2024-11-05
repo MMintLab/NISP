@@ -48,7 +48,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
             L,
             L_e,
             etc,
-        ) = get_dataset(N=3000, SEQ_IDX=data_idx) 
+        ) = get_dataset(N=3000, SEQ_IDX=data_idx, noise_lev = config.noise_lev) 
 
 
         if config.nondim == True:

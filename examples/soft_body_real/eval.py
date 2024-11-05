@@ -20,7 +20,7 @@ import wandb
 
 import models
 
-from jaxpi.utils import restore_checkpoint
+from nisp.utils import restore_checkpoint
 
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri

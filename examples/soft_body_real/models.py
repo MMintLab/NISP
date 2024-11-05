@@ -7,14 +7,14 @@ from jax.experimental.jet import jet
 from jax.tree_util import tree_map
 from jax.flatten_util import ravel_pytree
 
-from jaxpi.models import ForwardBVP
-from jaxpi.evaluator import BaseEvaluator
-from jaxpi.utils import ntk_fn
+from nisp.models import ForwardBVP
+from nisp.evaluator import BaseEvaluator
+from nisp.utils import ntk_fn
 from jax.experimental.host_callback import call
 
 import matplotlib.cm as cm
 from mmint_tools.camera_tools.pointcloud_utils import save_pointcloud
-from jaxpi.chamfer_distance import chamfer_distance_jit, chamfer_distance_directional
+from nisp.chamfer_distance import chamfer_distance_jit, chamfer_distance_directional
 from mmint_tools.camera_tools.pointcloud_utils import tr_pointcloud
 
 
@@ -372,32 +372,43 @@ class VehicleSuspension(ForwardBVP):
             + s2_pred * self.surface_normals[:, 2]
         )
 
+        # sigma @ n @ n'
+        sigma_n_n = f_x * surface_normal_wrist[:,0] + f_y * surface_normal_wrist[:,0] + f_z * surface_normal_wrist[:,0]
+        signorini_loss = jnp.mean( (sigma_n_n *  normal_deformation) **2 )
+        # jax.debug.print("🤯 sigma_n_n {x} 🤯", x=sigma_n_n)
+        # jax.debug.print("🤯 s0_pred {x} 🤯", x=s0_pred.shape)
+        # jax.debug.print("🤯 surface_normal_wrist {x} 🤯", x=surface_normal_wrist.shape)
+
         # signorini_loss [partial]: Contact force > 0 iff normal deformation > 0.
         # signorini_loss_ = jnp.mean(f_pred[self.non_contact_index] ** 2)
 
-        # zero contact force @ no normal force  
-        signorini_loss_no_force = jnp.where(
-            normal_deformation <= 0, f_pred, jnp.zeros_like(f_pred)
-        ) 
+        # # zero contact force @ no normal force  
+        # signorini_loss_no_force = jnp.where(
+        #     normal_deformation <= 0, f_pred, jnp.zeros_like(f_pred)
+        # ) 
 
-        # zero contact force @ sides 
-        signorini_loss_no_force = jnp.where(self.non_contact_index == True, 
-                                                  normal_deformation, 
-                                                  signorini_loss_no_force)
-
-
-        # zero normal deformation @ no contact force
-        signorini_loss_no_deformation = jnp.where(
-            f_pred <= 0, normal_deformation, jnp.zeros_like(f_pred)
-        )
-
-        # zero normal deformation @ sides
-        signorini_loss_no_deformation = jnp.where(self.non_contact_index == True, 
-                                                  normal_deformation, 
-                                                  signorini_loss_no_deformation)
+        # # zero contact force @ sides 
+        # signorini_loss_no_force = jnp.where(self.non_contact_index == True, 
+        #                                           normal_deformation, 
+        #                                           signorini_loss_no_force)
 
 
-        signorini_loss = jnp.mean(signorini_loss_no_force**2) + jnp.mean(signorini_loss_no_deformation**2)
+        # # zero normal deformation @ no contact force
+        # signorini_loss_no_deformation = jnp.where(
+        #     f_pred <= 0, normal_deformation, jnp.zeros_like(f_pred)
+        # )
+
+        # # zero normal deformation @ sides
+        # signorini_loss_no_deformation = jnp.where(self.non_contact_index == True, 
+        #                                           normal_deformation, 
+        #                                           signorini_loss_no_deformation)
+
+
+        # signorini_loss = jnp.mean(signorini_loss_no_force**2) + jnp.mean(signorini_loss_no_deformation**2)
+
+
+
+
 
         # no_pull_loss: Contact force >= 0
         no_pull_loss = jnp.mean(

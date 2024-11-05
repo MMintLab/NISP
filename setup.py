@@ -9,10 +9,8 @@ except IOError:
     README = ""
 
 setup(
-    name="jaxpi",
+    name="nisp",
     version="0.0.1",
-    url="https://github.com/PredictiveIntelligenceLab/JAX-PI",
-    author="Sifan Wang, Shyam Sankaran, Hanwen Wang",
     packages=find_packages(),
     python_requires=">=3.8",
     install_requires=[

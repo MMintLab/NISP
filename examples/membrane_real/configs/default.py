@@ -8,6 +8,7 @@ def get_config():
     config = ml_collections.ConfigDict()
     config.mode = "train"
     config.data_idx = [1]
+    config.noise_lev = 0 # 0.001, 0.003
 
     # Weights & Biases
     config.wandb = wandb = ml_collections.ConfigDict()

@@ -12,8 +12,8 @@ from jax.flatten_util import ravel_pytree
 from jax.tree_util import tree_map
 
 import models
-from jaxpi.samplers import SpaceSampler_dict
-from jaxpi.utils import save_checkpoint
+from nisp.samplers import SpaceSampler_dict
+from nisp.utils import save_checkpoint
 from utils import get_dataset
 
 
