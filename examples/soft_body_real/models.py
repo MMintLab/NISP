@@ -373,8 +373,12 @@ class VehicleSuspension(ForwardBVP):
         )
 
         # sigma @ n @ n'
-        sigma_n_n = f_x * surface_normal_wrist[:,0] + f_y * surface_normal_wrist[:,0] + f_z * surface_normal_wrist[:,0]
-        signorini_loss = jnp.mean( (sigma_n_n *  normal_deformation) **2 )
+        sigma_n_n = (
+            f_x * surface_normal_wrist[:, 0]
+            + f_y * surface_normal_wrist[:, 0]
+            + f_z * surface_normal_wrist[:, 0]
+        )
+        signorini_loss = jnp.mean((sigma_n_n * normal_deformation) ** 2)
         # jax.debug.print("🤯 sigma_n_n {x} 🤯", x=sigma_n_n)
         # jax.debug.print("🤯 s0_pred {x} 🤯", x=s0_pred.shape)
         # jax.debug.print("🤯 surface_normal_wrist {x} 🤯", x=surface_normal_wrist.shape)
@@ -382,16 +386,15 @@ class VehicleSuspension(ForwardBVP):
         # signorini_loss [partial]: Contact force > 0 iff normal deformation > 0.
         # signorini_loss_ = jnp.mean(f_pred[self.non_contact_index] ** 2)
 
-        # # zero contact force @ no normal force  
+        # # zero contact force @ no normal force
         # signorini_loss_no_force = jnp.where(
         #     normal_deformation <= 0, f_pred, jnp.zeros_like(f_pred)
-        # ) 
+        # )
 
-        # # zero contact force @ sides 
-        # signorini_loss_no_force = jnp.where(self.non_contact_index == True, 
-        #                                           normal_deformation, 
+        # # zero contact force @ sides
+        # signorini_loss_no_force = jnp.where(self.non_contact_index == True,
+        #                                           normal_deformation,
         #                                           signorini_loss_no_force)
-
 
         # # zero normal deformation @ no contact force
         # signorini_loss_no_deformation = jnp.where(
@@ -399,16 +402,11 @@ class VehicleSuspension(ForwardBVP):
         # )
 
         # # zero normal deformation @ sides
-        # signorini_loss_no_deformation = jnp.where(self.non_contact_index == True, 
-        #                                           normal_deformation, 
+        # signorini_loss_no_deformation = jnp.where(self.non_contact_index == True,
+        #                                           normal_deformation,
         #                                           signorini_loss_no_deformation)
 
-
         # signorini_loss = jnp.mean(signorini_loss_no_force**2) + jnp.mean(signorini_loss_no_deformation**2)
-
-
-
-
 
         # no_pull_loss: Contact force >= 0
         no_pull_loss = jnp.mean(
@@ -420,7 +418,7 @@ class VehicleSuspension(ForwardBVP):
             jnp.all(self.surface_normals == jnp.array([0, 0, -1.0]), axis=1),
             f_pred,
             jnp.zeros_like(f_pred),
-        )   
+        )
         f_fixture = jnp.where(
             jnp.all(self.surface_normals == jnp.array([0, 0, +1.0]), axis=1),
             f_pred,

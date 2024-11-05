@@ -8,12 +8,12 @@ def get_config():
     config = ml_collections.ConfigDict()
     config.mode = "train"
     config.data_idx = [1]
-    config.noise_lev = 0 # 0.001, 0.003
+    config.noise_lev = 0  # 0.001, 0.003
 
     # Weights & Biases
     config.wandb = wandb = ml_collections.ConfigDict()
     wandb.project = "membrane"
-    wandb.name = "6" 
+    wandb.name = "6"
     wandb.tag = None
 
     # Nondimensionalization
@@ -21,15 +21,15 @@ def get_config():
 
     # Arch
     config.arch = arch = ml_collections.ConfigDict()
-    arch.arch_name = "ModifiedMlpIDP" #"ModifiedMlpIDP"
+    arch.arch_name = "ModifiedMlpIDP"  # "ModifiedMlpIDP"
     arch.num_layers = 4
     arch.hidden_dim = 256
     arch.out_dim = 4
     arch.activation = "tanh"  # gelu works better than tanh
     arch.periodicity = None
 
-    #None
-    arch.fourier_emb = None 
+    # None
+    arch.fourier_emb = None
     arch.reparam = ml_collections.ConfigDict(
         {"type": "weight_fact", "mean": 0.5, "stddev": 0.1}
     )
@@ -41,14 +41,14 @@ def get_config():
     optim.beta2 = 0.999
     optim.eps = 1e-8
     optim.learning_rate = 5e-4
-    optim.decay_rate = 0.9 #0.9
+    optim.decay_rate = 0.9  # 0.9
     optim.decay_steps = 1000
     optim.grad_accum_steps = 0
 
     # Training
     config.training = training = ml_collections.ConfigDict()
     training.max_steps = 30000
-    training.batch_size_per_device = 20000 #8192
+    training.batch_size_per_device = 20000  # 8192
 
     # Weighting
     config.weighting = weighting = ml_collections.ConfigDict()
@@ -61,7 +61,7 @@ def get_config():
             "r": 1e0,
             "w_bc": 5e5,
             "f": 1e1,
-            "stick":1e-1,
+            "stick": 1e-1,
         }
     )
     weighting.momentum = 0.9

@@ -12,43 +12,42 @@ def get_config():
     # Weights & Biases
     config.wandb = wandb = ml_collections.ConfigDict()
     wandb.project = "double_pendulum"
-    wandb.name = "4_256" #_db
+    wandb.name = "4_256"  # _db
     wandb.tag = None
     config.data_idx = [
-        [-0.3, 0,0,0], 
-        # [-0.2, 0,0,0], [-0.1, 0,0,0], [0.1, 0,0,0], 
-        # [0.2, 0,0,0], 
+        [-0.3, 0, 0, 0],
+        # [-0.2, 0,0,0], [-0.1, 0,0,0], [0.1, 0,0,0],
+        # [0.2, 0,0,0],
         # [0.3, 0,0,0],
-                       [0, -0.3, 0,0], 
-        # [0, -0.2,0,0], [0, -0.1,0,0], [0, 0.1, 0,0], 
+        [0, -0.3, 0, 0],
+        # [0, -0.2,0,0], [0, -0.1,0,0], [0, 0.1, 0,0],
         #                [0, 0.2, 0,0], [0, 0.3, 0,0],
-                       [0, 0, -0.3, 0],
-                    #      [0, 0, -0.2,0], 
-                    #    [0, 0, -0.1,0], [0, 0, 0.1, 0], 
-                    #    [0, 0, 0.2, 0], 
-                    #    [0, 0, 0.3, 0],
-                       [0, 0, 0, -0.3], 
-                    #    [0, 0, 0, -0.2],[0, 0, 0, -0.1], [0, 0, 0, 0.1], [0, 0, 0,  0.2], [0, 0, 0,0.3]
-                       ]
-
+        [0, 0, -0.3, 0],
+        #      [0, 0, -0.2,0],
+        #    [0, 0, -0.1,0], [0, 0, 0.1, 0],
+        #    [0, 0, 0.2, 0],
+        #    [0, 0, 0.3, 0],
+        [0, 0, 0, -0.3],
+        #    [0, 0, 0, -0.2],[0, 0, 0, -0.1], [0, 0, 0, 0.1], [0, 0, 0,  0.2], [0, 0, 0,0.3]
+    ]
 
     # Nondimensionalization
     config.nondim = True
 
     # Arch
     config.arch = arch = ml_collections.ConfigDict()
-    arch.arch_name = "ModifiedMlpIDP" #"ModifiedMlpIDP"
+    arch.arch_name = "ModifiedMlpIDP"  # "ModifiedMlpIDP"
     arch.num_layers = 3
     arch.hidden_dim = 256
     arch.out_dim = 4
     arch.activation = "tanh"  # gelu works better than tanh
     arch.periodicity = None
-#     ml_collections.ConfigDict({
-#     'period': (1.0, 2/3), 
-#     'axis': (0, 1), 
-#     'trainable': (True, False)
-# })
-    #None
+    #     ml_collections.ConfigDict({
+    #     'period': (1.0, 2/3),
+    #     'axis': (0, 1),
+    #     'trainable': (True, False)
+    # })
+    # None
     arch.fourier_emb = None
     # ml_collections.ConfigDict(
     #     {"embed_scale": 1 , "embed_dim": 128}
@@ -64,14 +63,14 @@ def get_config():
     optim.beta2 = 0.999
     optim.eps = 1e-8
     optim.learning_rate = 1e-3
-    optim.decay_rate = 0.9 #0.9
+    optim.decay_rate = 0.9  # 0.9
     optim.decay_steps = 5000
     optim.grad_accum_steps = 0
 
     # Training
     config.training = training = ml_collections.ConfigDict()
-    training.max_steps = 100001 #100001
-    training.batch_size_per_device = 2000 #8192
+    training.max_steps = 100001  # 100001
+    training.batch_size_per_device = 2000  # 8192
 
     # Weighting
     config.weighting = weighting = ml_collections.ConfigDict()
@@ -86,7 +85,6 @@ def get_config():
             # "q1_loss": 1e4,
             # "q2_loss": 1e4,
             # "r_loss": 1e1,
-
         }
     )
 
@@ -105,7 +103,7 @@ def get_config():
 
     # Saving
     config.saving = saving = ml_collections.ConfigDict()
-    saving.save_every_steps = 50000 #100001
+    saving.save_every_steps = 50000  # 100001
     saving.num_keep_ckpts = 10
 
     # Input shape for initializing Flax models

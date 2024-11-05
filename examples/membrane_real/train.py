@@ -22,60 +22,64 @@ import models
 from utils import get_dataset
 
 
-
-    
 def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
     for data_idx in config.data_idx:
         # project name = data_idx
         wandb_config = config.wandb
-        wandb_config.name = str(data_idx) 
+        wandb_config.name = str(data_idx)
 
         # Initialize W&B
         wandb.init(project=wandb_config.project, name=wandb_config.name)
-
 
         # Get dataset
         (
             obs_pcd,
             wall_coords,
-            outer_coords, 
+            outer_coords,
             E,
             P,
-            t, 
+            t,
             nu,
-            a, 
+            a,
             b,
             L,
             L_e,
             etc,
-        ) = get_dataset(N=3000, SEQ_IDX=data_idx, noise_lev = config.noise_lev) 
-
+        ) = get_dataset(N=3000, SEQ_IDX=data_idx, noise_lev=config.noise_lev)
 
         if config.nondim == True:
 
-            E = E / (L **2)   # rubber 0.1 GPa (N/m**2)
-            P = P / (L **2)
-            t = t * L# 0.3 mm
-            a, b = a*L, b*L
+            E = E / (L**2)  # rubber 0.1 GPa (N/m**2)
+            P = P / (L**2)
+            t = t * L  # 0.3 mm
+            a, b = a * L, b * L
             wall_coords = wall_coords * L
             obs_pcd = obs_pcd * L
             outer_coords = outer_coords * L
-            
-    
+
         # test_coords = jnp.concatenate([inner_coords, outer_coords ], axis = 0)
         model = models.Membrane(
             config,
             wall_coords,
             obs_pcd,
             outer_coords,
-            E, P, t, nu, a, b, L, L_e,
+            E,
+            P,
+            t,
+            nu,
+            a,
+            b,
+            L,
+            L_e,
         )
 
         evaluator = models.MembraneEvaluator(config, model)
 
         # Initialize residual sampler
         data_dict = {"outer_coords": outer_coords}
-        res_sampler = iter(SpaceSampler_dict(data_dict, config.training.batch_size_per_device))
+        res_sampler = iter(
+            SpaceSampler_dict(data_dict, config.training.batch_size_per_device)
+        )
 
         print("Waiting for JIT...")
         for step in range(config.training.max_steps):
@@ -105,5 +109,6 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
                     step + 1
                 ) == config.training.max_steps:
                     path = os.path.join(workdir, "ckpt", config.wandb.name)
-                    save_checkpoint(model.state, path, keep=config.saving.num_keep_ckpts)
-
+                    save_checkpoint(
+                        model.state, path, keep=config.saving.num_keep_ckpts
+                    )

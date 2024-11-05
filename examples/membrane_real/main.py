@@ -1,5 +1,6 @@
 # DETERMINISTIC
 import os
+
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from absl import app
@@ -30,7 +31,6 @@ def main(argv):
 
     elif FLAGS.config.mode == "eval":
         eval.evaluate(FLAGS.config, FLAGS.workdir)
-
 
 
 if __name__ == "__main__":
