@@ -15,8 +15,6 @@ The code has been tested and confirmed to work with the following versions:
 - cuDNN 8.9
 
 
-Install JAX-PI with the following commands:
-
 ``` 
 git clone https://github.com/MMintLab/NISP
 cd NISP
