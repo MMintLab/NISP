@@ -9,36 +9,50 @@ import matplotlib.pyplot as plt
 
 import deepxde as dde
 from deepxde.geometry import Ellipse as EllipseDDE
-from data_utils import load_ellipse, get_bubble_tool_contact_points_sdf, process_bubble_img, filter_depth_map
+from data_utils import (
+    load_ellipse,
+    get_bubble_tool_contact_points_sdf,
+    process_bubble_img,
+    filter_depth_map,
+)
+
 
 class Ellipse(EllipseDDE):
     def __init__(**kwarg):
         super.__init__(**kwarg)
-    
+
     def uniform_points(self, n, boundary=True):
-        s = np.sqrt( (2 * self.semimajor) * (2 * self.semiminor) / ( 2 * n ))
-        x_grid = [s * i - self.semimajor for i in range( 2 * int(self.semimajor // s) + 1)] 
-        y_grid = [s * i - self.semiminor for i in range( 2 * int(self.semiminor // s) + 1)] 
+        s = np.sqrt((2 * self.semimajor) * (2 * self.semiminor) / (2 * n))
+        x_grid = [
+            s * i - self.semimajor for i in range(2 * int(self.semimajor // s) + 1)
+        ]
+        y_grid = [
+            s * i - self.semiminor for i in range(2 * int(self.semiminor // s) + 1)
+        ]
 
         xv, yv = np.meshgrid(x_grid, y_grid)
-        
+
         uniform_pts = []
         for pt in zip(xv.reshape(-1), yv.reshape(-1)):
-            if  self.inside(pt):
+            if self.inside(pt):
                 uniform_pts.append(pt)
         print(
-                "Warning: {} points required, but {} points sampled.".format(n, len(uniform_pts))
+            "Warning: {} points required, but {} points sampled.".format(
+                n, len(uniform_pts)
             )
-        
+        )
+
         return np.array(uniform_pts)
 
 
-def get_dataset(N=100000, SEQ_IDX=0, data_name=None, noise_lev=0, data_dir = 'data/'):
-    data_dir = "/data/young/nisp_membrane_data"  # Replace this with the path to the data
+def get_dataset(N=100000, SEQ_IDX=0, data_name=None, noise_lev=0, data_dir="data/"):
+    data_dir = (
+        "/data/young/nisp_membrane_data"  # Replace this with the path to the data
+    )
     data_name = f"{SEQ_IDX}.pkl"
     # data_name = "bubble_v2_tactile_shadowing_data" if data_name is None else data_name
     # # data_name = 'bubble_v2_tactile_shadowing_data_only_o_45'
-    
+
     with open(os.path.join(data_dir, data_name), "rb") as f:
         sample = pickle.load(f)
     # dataset = BubbleV2Dataset(

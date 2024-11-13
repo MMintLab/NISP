@@ -20,9 +20,10 @@ config_flags.DEFINE_config_file(
 def set_cuda_visible_devices():
     os.environ["CUDA_VISIBLE_DEVICES"] = str(FLAGS.config.gpu_id)
 
+
 def main(argv):
     set_cuda_visible_devices()
-    
+
     from examples.membrane_real.train import train_and_evaluate
     import examples.membrane_real.train as train
     import eval

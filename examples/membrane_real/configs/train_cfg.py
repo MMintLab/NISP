@@ -9,7 +9,9 @@ def get_config():
     config.mode = "train"
     config.data_idx = [1]
     config.noise_lev = 0  # 0.001, 0.003
-    config.data_dir = "/data/young/nisp_membrane_data" # TODO: change this to your own directory 
+    config.data_dir = (
+        "/data/young/nisp_membrane_data"  # TODO: change this to your own directory
+    )
     config.gpu_id = "3"
 
     # Weights & Biases
@@ -23,11 +25,11 @@ def get_config():
 
     # Arch
     config.arch = arch = ml_collections.ConfigDict()
-    arch.arch_name = "ModifiedMlpIDP" 
+    arch.arch_name = "ModifiedMlpIDP"
     arch.num_layers = 4
     arch.hidden_dim = 256
     arch.out_dim = 4
-    arch.activation = "tanh"  
+    arch.activation = "tanh"
     arch.periodicity = None
 
     # None

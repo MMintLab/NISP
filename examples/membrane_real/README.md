@@ -1,7 +1,7 @@
 # Membrane Sensor
 
 ## Additional Dependencies
-1. Deepxde's geometry offers various 2D/3D geometries of closed domains.
+1. Deepxde's `geometry` offers various 2D/3D geometries of closed domains.
 ```
     git clone git@github.com:yswi/deepxde.git
     cd deepxde
