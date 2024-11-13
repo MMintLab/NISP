@@ -27,13 +27,18 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
     for a, b, c, d in config.data_idx:
         # Initialize W&B
         wandb_config = config.wandb
-        wandb_config.name = f"{a}_{b}_{c}_{d}_test"
+        wandb_config.name = f"{a}_{b}_{c}_{d}_train"
         wandb.init(project=wandb_config.project, name=wandb_config.name)
 
         # Get dataset
         (L, t, t_dense, g, m0, m1, m2, l, q0, q1, q2, u_control, etc) = get_dataset(
-            N=200, a=a, b=b, c=c, d=d
-        )  # 100000
+            N=200,
+            a=a,
+            b=b,
+            c=c,
+            d=d,
+            noise=config.noise,
+        )
 
         if config.nondim == True:
             q0 = q0 * L
@@ -89,10 +94,6 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
 
                     log_dict = evaluator(state, batch, t)
                     wandb.log(log_dict)
-
-            if step == 0:
-                print(log_dict)
-                breakpoint()
 
             # Save checkpoint
             if config.saving.save_every_steps is not None:

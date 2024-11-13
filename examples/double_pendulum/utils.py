@@ -1,53 +1,11 @@
 import os
-import torch
-import copy
-
 import numpy as np
 import open3d as o3d
 import jax.numpy as jnp
-import scipy.io
-import deepxde as dde
-import matplotlib.cm as cm
 
-from tactileshadow.nominal_dataset import gen_nominal_data
-from bubble_tools.bubble_tools.bubble_ellipsoid_tools import load_ellipse
-from bubble_tools.bubble_datasets.implemented_datasets.bubble_calibration_dataset import (
-    BubbleCalibrationDataset,
-)
-from bubble_tools.bubble_tools.bubble_pc_tools import tf_camera_to_bubble_frame
-from bubble_tools.bubble_tools.bubble_constants import (
-    get_bubble_frame_from_camera_frame,
-)
-from mmint_tools import tr, pose_to_matrix, matrix_to_pose, transform_matrix_inverse
-from bubble_tools.bubble_datasets.implemented_datasets.bubble_calibration_board_dataset import (
-    BubbleCalibrationBoardDataset,
-)
-from bubble_tools.bubble_shape_tools.shape_tools import (
-    get_bubble_tool_contact_points_sdf,
-)
-import mmint_tools.data_utils.loading_utils as load_utils
-
-from bubble_tools.bubble_tools.bubble_img_tools import (
-    process_bubble_img,
-    unprocess_bubble_img,
-    filter_depth_map,
-    project_processed_bubble,
-    process_bubble_img_coordinates,
-    unprocess_bubble_img_coordinates,
-)
-from bubble_tools.bubble_tools.bubble_pc_tools import tf_camera_to_bubble_frame
-from mmint_tools.camera_tools.img_utils import project_depth_image
-from bubble_tools.bubble_tools.bubble_ellipsoid_tools import load_ellipse
-from bubble_tools.bubble_tools.bubble_shear_tools import (
-    load_deformation_field,
-    load_deformation_field_advanced,
-    compute_deformation_field_advanced,
-)
 import scipy.signal
 import matplotlib.pyplot as plt
-
 from scipy.integrate import odeint
-from scipy.integrate import solve_ivp
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -338,9 +296,7 @@ def animate_pendulum(t, states, length, filename=None):
         anim.save(filename, fps=30, codec="libx264")
 
 
-def get_dataset(N=1000, a=0, b=0, c=0, d=0):
-    # x0 = np.hstack((0, np.pi / 2 * np.ones(len(q) - 1) - 0.3,
-    #             1 * np.ones(len(u))))
+def get_dataset(N=1000, a=0, b=0, c=0, d=0, noise=0):
     x0 = np.hstack([0, np.pi / 2 + a, np.pi / 2 + b, 0, c, d])
     t = np.linspace(0.0, 3.0, num=N)
     t_dense = np.linspace(0.0, 3.0, num=4 * N)
@@ -377,8 +333,8 @@ def get_dataset(N=1000, a=0, b=0, c=0, d=0):
     x = np.tile(x_without_noise, (5, 1))
     t = np.tile(t, 5)
 
-    # Noise Injectio
-    x = x + np.random.normal(0, 0.01, size=x.shape)
+    # Noise Injection
+    x = x + np.random.normal(0, noise, size=x.shape)
     q0 = jnp.array(x[:, 0])[..., jnp.newaxis]
     q1 = jnp.array(x[:, 1])[..., jnp.newaxis]
     q2 = jnp.array(x[:, 2])[..., jnp.newaxis]
