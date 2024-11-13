@@ -1,5 +1,6 @@
 # Soft body real
 
+* This example is under development.
 
 ```
 python3 main.py ./configs/default.py --mode=train

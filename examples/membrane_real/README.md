@@ -26,5 +26,5 @@ python3 main.py ./configs/train_cfg.py --mode=train
 ```
 
 ## Evaluation
-Once trained, to obtain the final predicted error and visualizations, run jupyter notebook examples 'visualization.ipynb' and 'stat.ipynb'.
+Once trained, to obtain the final predicted error and visualizations, run jupyter notebook examples `visualization.ipynb` and `stat.ipynb`.
 
