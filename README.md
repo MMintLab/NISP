@@ -23,7 +23,7 @@ pip install -e .
 
 ## Quickstart
 
-Please follow the readme.md in each example folders. For instance,
+Please follow the readme.md in each example folder. For instance,
 
 ``` 
 cd examples/membrane_real
