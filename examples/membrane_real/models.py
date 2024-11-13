@@ -14,9 +14,9 @@ from jax.experimental.host_callback import call
 
 import matplotlib.cm as cm
 
-# from mmint_tools.camera_tools.pointcloud_utils import save_pointcloud
 from nisp.chamfer_distance import chamfer_distance_jit, chamfer_distance_directional_jit
 
+# TODO: grad to jet
 
 class Membrane(ForwardBVP):
     def __init__(

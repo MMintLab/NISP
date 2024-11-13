@@ -24,7 +24,6 @@ from utils import get_dataset
 
 def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
     for data_idx in config.data_idx:
-        # project name = data_idx
         wandb_config = config.wandb
         wandb_config.name = str(data_idx)
 

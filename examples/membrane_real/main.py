@@ -1,22 +1,14 @@
 # DETERMINISTIC
 import os
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 from absl import app
 from absl import flags
 from absl import logging
-
-import jax
 from ml_collections import config_flags
-from examples.membrane_real.train import train_and_evaluate
-import examples.membrane_real.train as train
-import eval
+
 
 FLAGS = flags.FLAGS
-
 flags.DEFINE_string("workdir", ".", "Directory to store model data.")
-
 config_flags.DEFINE_config_file(
     "config",
     "./configs/default.py",
@@ -25,7 +17,16 @@ config_flags.DEFINE_config_file(
 )
 
 
+def set_cuda_visible_devices():
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(FLAGS.config.gpu_id)
+
 def main(argv):
+    set_cuda_visible_devices()
+    
+    from examples.membrane_real.train import train_and_evaluate
+    import examples.membrane_real.train as train
+    import eval
+
     if FLAGS.config.mode == "train":
         train.train_and_evaluate(FLAGS.config, FLAGS.workdir)
 
