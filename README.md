@@ -30,7 +30,7 @@ cd examples/membrane_real
 ``` 
 To train the model, run the following command:
 ```
-CUDA_VISIBLE_DEVICES=0 python3 main.py --config configs/default.py
+CUDA_VISIBLE_DEVICES=0 python3 main.py --config configs/train.py
 ```
 
 
