@@ -17,7 +17,7 @@ from mmint_tools.camera_tools.pointcloud_utils import save_pointcloud
 from nisp.chamfer_distance import chamfer_distance_jit
 
 
-class VehicleSuspension(ForwardBVP):
+class DoublePendulum(ForwardBVP):
     def __init__(
         self,
         config,
@@ -185,7 +185,7 @@ class VehicleSuspension(ForwardBVP):
         return ntk_dict
 
 
-class VehicleSuspensionEvaluator(BaseEvaluator):
+class DoublePendulumEvaluator(BaseEvaluator):
     def __init__(self, config, model):
         super().__init__(config, model)
 

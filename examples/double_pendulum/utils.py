@@ -1,9 +1,7 @@
 import os
 import numpy as np
-import open3d as o3d
 import jax.numpy as jnp
-
-import scipy.signal
+import pickle
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
@@ -13,7 +11,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # from __future__ import division, print_function
 import sympy as sm
 import sympy.physics.mechanics as me
-from numpy.linalg import matrix_rank
 from scipy.linalg import solve_continuous_are
 from numpy.linalg import solve
 
@@ -335,13 +332,27 @@ def get_dataset(N=1000, a=0, b=0, c=0, d=0, noise=0):
 
     # Noise Injection
     x = x + np.random.normal(0, noise, size=x.shape)
+    L = 1
+
     q0 = jnp.array(x[:, 0])[..., jnp.newaxis]
     q1 = jnp.array(x[:, 1])[..., jnp.newaxis]
     q2 = jnp.array(x[:, 2])[..., jnp.newaxis]
     t = jnp.array(t)[..., jnp.newaxis]
-
     u_control = jnp.array(u_control)
-    L = 1
+
+
+    # Save training data
+    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+    with open( os.path.join(save_path, f"{a}_{b}_{c}_{d}_{noise}.pkl"), "wb") as f:
+        data_dict = {"L": L, "t": np.array(t), "t_dense": np.array(t_dense), 
+                     "g": g, "m0": np.array(m0), "m1": np.array(m1), "m2": np.array(m2), "l": np.array(L), 
+                     "q0": np.array(q0), "q1": np.array(q1), "q2": np.array(q2), "u_control": np.array(u_control), 
+                     "x_without_noise": np.array(x_without_noise)}
+        pickle.dump(data_dict, f)
+     
+
 
     return (L, t, t_dense, g, m0, m1, m2, l, q0, q1, q2, u_control, x_without_noise)
 

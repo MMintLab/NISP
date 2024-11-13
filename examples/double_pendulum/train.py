@@ -1,24 +1,19 @@
 import time
 import os
+import ml_collections
 
 from absl import logging
-
+import wandb
 import jax
 import jax.numpy as jnp
 from jax import vmap, jacrev
 from jax.flatten_util import ravel_pytree
 from jax.tree_util import tree_map
-
-import ml_collections
-
-import wandb
-
 import matplotlib.pyplot as plt
 
+import models
 from nisp.samplers import SpaceSampler_dict
 from nisp.utils import save_checkpoint
-
-import models
 from utils import get_dataset
 
 
@@ -27,7 +22,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
     for a, b, c, d in config.data_idx:
         # Initialize W&B
         wandb_config = config.wandb
-        wandb_config.name = f"{a}_{b}_{c}_{d}_train"
+        wandb_config.name = f"{a}_{b}_{c}_{d}_{config.noise}"
         wandb.init(project=wandb_config.project, name=wandb_config.name)
 
         # Get dataset
@@ -48,8 +43,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
             l = l * L
             u_control = u_control * L
 
-        # Initialize model (TODO: implement non dimensionalization)
-        model = models.VehicleSuspension(
+        model = models.DoublePendulum(
             config,
             m0,
             m1,
@@ -60,7 +54,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict, workdir: str):
             u_control,
         )
 
-        evaluator = models.VehicleSuspensionEvaluator(config, model)
+        evaluator = models.DoublePendulumEvaluator(config, model)
 
         # Initialize residual sampler
         data_dict = {
